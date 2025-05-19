@@ -21,12 +21,12 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
 
 ## Installation
 
-1. **Follow these guides to get your IHC system up and running:**
+1. **Follow these guides to get your IHC server up and running:**
    - [USB to RS485 dongle configuration](https://github.com/priiduonu/ihcclient/blob/main/docs/USBtoRS485.md)
    - [IHCServer setup guide](https://github.com/priiduonu/ihcclient/blob/main/docs/IHCServer.md)
 
 
-2. **Clone this repository and move the files to `/opt/`:**
+2. **Clone this repository to the `/opt` folder:**
 
    ```bash
    cd /opt
@@ -37,7 +37,7 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
 
    Run the following command to install the dependencies:
 
-       pip3 install -r requirements.txt
+       sudo pip3 install -r requirements.txt
 
 4. **Edit `IHCBridge.py` to match your setup**
 
@@ -47,7 +47,7 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
    - `self.mqtt_host`: Set this to the IP address of your MQTT broker.
    - If your MQTT credentials differ from the default, update the line:
 
-         self.mqtt_client.username_pw_set("IHC", "admin")
+         self.mqtt_client.username_pw_set("USERNAME", "PASSWORD")
 
      Or remove it if your broker doesn’t require authentication.
 
@@ -66,10 +66,9 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
        After=network.target
 
        [Service]
-       ExecStart=/usr/bin/python3 /opt/ihc_mqtt_bridge.py
+       ExecStart=/usr/bin/python3 /opt/IHCBridge.py
        Restart=always
        RestartSec=10
-       User=admin
 
        [Install]
        WantedBy=multi-user.target
