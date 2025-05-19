@@ -1,0 +1,4 @@
+json
+requests
+websocket-client
+paho-mqtt
