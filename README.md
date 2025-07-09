@@ -135,35 +135,81 @@ In your `configuration.yaml` file, add:
     mqtt:
       switch: !include mqtt_switches.yaml
       light: !include mqtt_lights.yaml
+      binary_sensor: !include mqtt_binary_sensors.yaml
 
-This tells Home Assistant to load switches and lights from separate files for better organization.
+This tells Home Assistant to load switches, lights, and binary sensors from separate files for better organization.
 
 ---
 
 ### 3. Create the YAML files
 
-Create `mqtt_switches.yaml` for switches and `mqtt_lights.yaml` for lights.
+Create separate files for different device types:
+- `mqtt_switches.yaml` for switches
+- `mqtt_lights.yaml` for lights
+- `mqtt_binary_sensors.yaml` for inputs (sensors, buttons, etc.)
 
-Each output (light or switch) must be manually added based on your IHC module layout.  
-Here's an example:
+Each output (light or switch) must be manually added based on your IHC module layout.
+
+#### Output Examples (Switches & Lights):
 
     # Module 1, Output 2 example
-    - unique_id: ihc_1_2
+    - unique_id: ihc_output_1_2
       name: "Dinner Table"
       state_topic: "ihc/outputState/1/2/state"
       command_topic: "ihc/output/1/2/set"
       payload_on: "ON"
       payload_off: "OFF"
 
-#### Explanation:
+#### Input Examples (Binary Sensors):
 
-- `unique_id`: Should be globally unique. I recommend the format `ihc_module_output`.
+> **Note**: Input support is implemented in the bridge code but has not been personally tested. It should work based on the code implementation.
+
+    # Module 1, Input 3 - Motion Sensor example
+    - unique_id: ihc_input_1_3
+      name: "Living Room Motion"
+      state_topic: "ihc/inputState/1/3/state"
+      payload_on: "ON"
+      payload_off: "OFF"
+      device_class: motion
+
+    # Module 1, Input 4 - Door Contact example  
+    - unique_id: ihc_input_1_4
+      name: "Front Door"
+      state_topic: "ihc/inputState/1/4/state"
+      payload_on: "ON"
+      payload_off: "OFF"
+      device_class: door
+
+    # Module 2, Input 1 - Push Button example
+    - unique_id: ihc_input_2_1
+      name: "Hallway Button"
+      state_topic: "ihc/inputState/2/1/state"
+      payload_on: "ON"
+      payload_off: "OFF"
+
+#### Key Differences Between Outputs and Inputs:
+
+**Outputs (Switches/Lights):**
+- State topic: `ihc/outputState/{module}/{output}/state`
+- Command topic: `ihc/output/{module}/{output}/set` (for sending commands)
+- Use `switch` or `light` in Home Assistant
+
+**Inputs (Binary Sensors):**
+- State topic: `ihc/inputState/{module}/{input}/state`
+- No command topic (read-only)
+- Use `binary_sensor` in Home Assistant
+- Can use device classes like `motion`, `door`, `window`, `button`, etc.
+
+#### Configuration Parameters:
+
+- `unique_id`: Should be globally unique. Recommended format: `ihc_output_<module>_<number>` for outputs, `ihc_input_<module>_<number>` for inputs.
 - `name`: The friendly name shown in the Home Assistant UI.
-- `state_topic`: The MQTT topic the bridge uses to publish the current output state.
-- `command_topic`: The topic that sends commands back to the bridge (which controls the IHC output).
-- `payload_on` / `payload_off`: Strings to represent on/off (can be customized if needed).
+- `state_topic`: The MQTT topic the bridge uses to publish the current state.
+- `command_topic`: The topic that sends commands back to the bridge (outputs only).
+- `payload_on` / `payload_off`: Strings to represent on/off states.
+- `device_class`: For binary sensors, use appropriate classes for better UI icons and behavior.
 
-Repeat for all relevant outputs by adjusting the module/output numbers and names.
+Repeat for all relevant outputs and inputs by adjusting the module/output/input numbers and names.
 
 ---
 
