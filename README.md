@@ -35,9 +35,23 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
 
 3. **Install required Python packages**
 
-   Run the following command to install the dependencies:
+   Run the following commands to install the dependencies in a vertual environment:
 
-       sudo pip3 install -r requirements.txt
+       # Install venv if you don’t have it
+       sudo apt update
+       sudo apt install python3-venv
+
+       # Navigate to the project folder
+       cd /opt/IHCBridge
+
+       # Create a virtual environment
+       python3 -m venv venv
+
+       # Activate the virtual environment
+       source venv/bin/activate
+
+       # Install dependencies inside the virtual environment
+       pip install -r requirements.txt
 
 4. **Edit `IHCBridge.py` to match your setup**
 
@@ -66,7 +80,7 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
        After=network.target
 
        [Service]
-       ExecStart=/usr/bin/python3 /opt/IHCBridge.py
+       ExecStart=/opt/IHCBridge/venv/bin/python /opt/IHCBridge.py
        Restart=always
        RestartSec=10
 
