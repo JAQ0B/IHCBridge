@@ -80,7 +80,7 @@ The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logg
        After=network.target
 
        [Service]
-       ExecStart=/opt/IHCBridge/venv/bin/python /opt/IHCBridge.py
+       ExecStart=/opt/IHCBridge/venv/bin/python /opt/IHCBridge/IHCBridge.py
        Restart=always
        RestartSec=10
 
