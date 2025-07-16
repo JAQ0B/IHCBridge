@@ -13,7 +13,7 @@ from threading import Thread, Event
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.INFO, # Change to logging.CRITICAL + 1 to disable logging
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.FileHandler("/opt/ihc_bridge.log"), logging.StreamHandler()],
 )
