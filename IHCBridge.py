@@ -117,6 +117,7 @@ class IHCBridge:
             self.mqtt_client.subscribe("ihc/output/+/+/set")
             self.mqtt_client.subscribe("ihc/system/restart")
             self.mqtt_client.subscribe("ihc/system/pi_restart")
+            self.mqtt_client.subscribe("ihc/system/republish_states")
             logger.info("Subscribed to IHC control topics")
         else:
             logger.error(f"Failed to connect to MQTT broker, return code: {rc}")
@@ -151,6 +152,11 @@ class IHCBridge:
                     logger.info("Received Raspberry Pi restart command via MQTT")
                     self.restart_raspberry_pi()
                     return
+            elif topic == "ihc/system/republish_states":
+                if payload.upper() == "REPUBLISH":
+                    logger.info("Received republish states command via MQTT")
+                    self.republish_all_states()
+                    return
 
             # If not a system command, treat as output control command
             # Parse topic to get module and output numbers
@@ -177,6 +183,38 @@ class IHCBridge:
         except Exception as e:
             logger.error(f"Error handling message: {e}")
 
+    def republish_all_states(self):
+        """Republish all current states to MQTT (useful after HA restart)"""
+        try:
+            logger.info("Republishing all current states...")
+            
+            # Get current states from IHC
+            ihc_url = f"http://{self.ihc_host}:{self.ihc_port}/ihcrequest"
+            payload = {"type": "getAll"}
+    
+            if self.ihc_username and self.ihc_password:
+                response = self.session.post(
+                    ihc_url,
+                    json=payload,
+                    auth=(self.ihc_username, self.ihc_password),
+                    timeout=5,
+                )
+            else:
+                response = self.session.post(ihc_url, json=payload, timeout=5)
+    
+            if response.status_code == 200:
+                data = response.json()
+                self.process_ihc_states(data)
+                self.mqtt_client.publish("ihc/system/status", "States republished successfully", retain=False)
+                logger.info("All states republished successfully")
+            else:
+                logger.error(f"Failed to get states for republishing: {response.status_code}")
+                self.mqtt_client.publish("ihc/system/status", "Failed to republish states", retain=False)
+    
+        except Exception as e:
+            logger.error(f"Error republishing states: {e}")
+            self.mqtt_client.publish("ihc/system/status", f"Error republishing states: {e}", retain=False)
+        
     def set_ihc_output(self, module, output, state):
         """Send command to IHC server"""
         payload = {
@@ -313,9 +351,14 @@ class IHCBridge:
                     for output in module.get("outputStates", []):
                         output_number = output.get("outputNumber")
                         state = "ON" if output.get("outputState") else "OFF"
-                        topic = f"ihc/output/{module_number}/{output_number}/state"
-                        self.mqtt_client.publish(topic, state, retain=True)
-                        logger.debug(f"Published initial state: {topic} = {state}")
+                        topic_output = f"ihc/output/{module_number}/{output_number}/state"
+                        topic_outputstate = f"ihc/outputState/{module_number}/{output_number}/state"
+                        
+                        self.mqtt_client.publish(topic_output, state, retain=True)
+                        self.mqtt_client.publish(topic_outputstate, state, retain=True)
+                        
+                        logger.debug(f"Published initial state: {topic_output} = {state}")
+                        logger.debug(f"Published initial state: {topic_outputstate} = {state}")
 
             # Process input modules
             input_modules = data.get("modules", {}).get("inputModules", [])
