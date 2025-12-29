@@ -2,7 +2,7 @@
 
 This script acts as a bridge between an IHC system and an MQTT broker, enabling Home Assistant to control and monitor IHC-based outputs and inputs via MQTT.
 
-It connects to the [IHCServer](https://github.com/priiduonu/ihcclient/blob/main/docs/IHCServer.md) using a WebSocket and exposes all input/output states over MQTT. It also listens for MQTT commands to control outputs on the IHC system. This makes it possible to integrate older Danish IHC systems into modern smart home platforms like Home Assistant.
+It connects to the [IHCServer]([https://github.com/priiduonu/ihcclient/blob/main/docs/IHCServer.md](https://github.com/skumlos/ihcserver)) using a WebSocket and exposes all input/output states over MQTT. It also listens for MQTT commands to control outputs on the IHC system. This makes it possible to integrate older Danish IHC systems into modern smart home platforms like Home Assistant.
 
 The bridge runs on a Raspberry Pi alongside the IHCServer and is resilient, logging all activity and reconnecting automatically in case of failures.
 
